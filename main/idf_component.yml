@@ -1,29 +1,23 @@
 dependencies:
   idf: ">=5.3,<5.5"
-  RadioLib:
-    git: https://github.com/xl9p/RadioLib.git
-    version: master
   arduino:
-    git: https://github.com/xl9p/arduino-esp32.git
+    git: git@github.com:xl9p/arduino-esp32.git
     version: v3.2_modified
-  CayenneLPP:
-    git: https://github.com/ElectronicCats/CayenneLPP.git
-    version: master
   Adafruit_BusIO:
-    git: https://github.com/xl9p/Adafruit_BusIO.git
+    git: git@github.com:xl9p/Adafruit_BusIO.git
     version: modified
   Adafruit_INA260:
-    git: https://github.com/xl9p/Adafruit_INA260.git
+    git: git@github.com:xl9p/Adafruit_INA260.git
     version: master
   SparkFun_ADXL345:
-    git: https://github.com/xl9p/SparkFun_ADXL345_Arduino_Library.git
+    git: git@github.com:xl9p/SparkFun_ADXL345_Arduino_Library.git
     version: i2c_custom_mod
   Adafruit_NeoPixel:
     git: git@github.com:xl9p/Adafruit_NeoPixel.git
     version: v1.12.3_with_build_files
   BME68xLibrary:
-    git: https://github.com/xl9p/Bosch-BME68x-Library.git
+    git: git@github.com:xl9p/BME68xLibrary.git
     version: modified
   BME69xLibrary:
-    git: https://github.com/xl9p/BME69xLibrary.git
+    git: git@github.com:xl9p/BME69xLibrary.git
     version: main
