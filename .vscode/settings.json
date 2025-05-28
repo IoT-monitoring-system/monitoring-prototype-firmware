@@ -1,15 +1,4 @@
 {
-    // "clangd.path": "/opt/esp/tools/esp-clang/15.0.0-23786128ae/esp-clang/bin/clangd",
-    // "clangd.arguments": [
-    //     "--enable-config",
-    //     "--background-index",
-    //     "--clang-tidy",
-    //     "--header-insertion=never",
-    //     "--suggest-missing-includes",
-    //     "--pch-storage=memory",
-    //     "--compile-commands-dir=${workspaceFolder}/build.clang",
-    //     "--fallback-style=none"
-    // ],
     "C_Cpp.intelliSenseEngine": "default",
     "terminal.integrated.scrollback": 100000000,
     "editor.formatOnSave": true,
@@ -119,7 +108,7 @@
         "thread": "cpp",
         "typeindex": "cpp"
     },
-    "idf.pythonInstallPath": "/opt/esp/python_env/idf5.1_py3.8_env/bin/python",
+    "idf.pythonInstallPath": "/opt/esp/python_env/idf5.4_py3.12_env/bin/python",
     "idf.customExtraVars": {
         "IDF_TARGET": "esp32s3"
     },
