@@ -1,11 +1,11 @@
 dependencies:
-  idf: ">=5.1,<5.2"
+  idf: ">=5.3,<5.5"
   RadioLib:
     git: https://github.com/xl9p/RadioLib.git
     version: master
   arduino:
     git: https://github.com/xl9p/arduino-esp32.git
-    version: i2c_mutex_mod
+    version: v3.2_modified
   CayenneLPP:
     git: https://github.com/ElectronicCats/CayenneLPP.git
     version: master

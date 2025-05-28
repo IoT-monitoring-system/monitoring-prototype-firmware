@@ -1,35 +1,21 @@
-[submodule "components/CayenneLPP"]
-	path = components/CayenneLPP
-	url = https://github.com/xl9p/CayenneLPP.git
-[submodule "components/RadioLib"]
-	path = components/RadioLib
-	url = https://github.com/xl9p/RadioLib.git
-	branch = master
 [submodule "components/arduino"]
 	path = components/arduino
-	url = https://github.com/xl9p/arduino-esp32.git
-	branch = i2c_mutex_mod
-[submodule "svd_files"]
-	path = svd_files
-	url = https://github.com/espressif/svd.git
-	branch = main
+	url = git@github.com:xl9p/arduino-esp32.git
+	branch = v3.2_modified
 [submodule "components/Adafruit_BusIO"]
 	path = components/Adafruit_BusIO
-	url = https://github.com/xl9p/Adafruit_BusIO.git
+	url = git@github.com:xl9p/Adafruit_BusIO.git
 	branch = modified
 [submodule "components/Adafruit_INA260"]
 	path = components/Adafruit_INA260
-	url = https://github.com/xl9p/Adafruit_INA260.git
+	url = git@github.com:xl9p/Adafruit_INA260.git
 [submodule "components/SparkFun_ADXL345"]
 	path = components/SparkFun_ADXL345
-	url = https://github.com/xl9p/SparkFun_ADXL345_Arduino_Library.git
+	url = git@github.com:xl9p/SparkFun_ADXL345_Arduino_Library.git
 	branch = i2c_custom_mod
-[submodule "components/pubsubclient"]
-	path = components/pubsubclient
-	url = https://github.com/xl9p/pubsubclient.git
 [submodule "components/CSE_GNSS"]
 	path = components/CSE_GNSS
-	url = https://github.com/xl9p/CSE_GNSS.git
+	url = git@github.com:xl9p/CSE_GNSS.git
 [submodule "components/Adafruit_NeoPixel"]
 	path = components/Adafruit_NeoPixel
 	url = git@github.com:xl9p/Adafruit_NeoPixel.git
@@ -37,10 +23,6 @@
 [submodule "components/BME68xLibrary"]
 	path = components/BME68xLibrary
 	url = git@github.com:xl9p/BME68xLibrary.git
-	branch = modified
-[submodule "components/BSEC2Library"]
-	path = components/BSEC2Library
-	url = git@github.com:xl9p/BSEC2Library.git
 	branch = modified
 [submodule "components/BME69xLibrary"]
 	path = components/BME69xLibrary
