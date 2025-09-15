@@ -1,12 +1,12 @@
 #include "esp_check.h"
 #include "memory.h"
 
-#include "gnss_module.h"
-#include "private/gnss_module_private.h"
+#include "gnss_receiver.h"
+#include "private/gnss_receiver_private.h"
 
-static char *TAG = "gnss_module";
+static char *TAG = "gnss_receiver";
 
-struct gnss_module_instance {
+struct gnss_receiver_instance {
   TaskHandle_t nmea_uart_task;
 
   char rx_buf[UART_RX_BUF_SIZE];
@@ -15,7 +15,7 @@ struct gnss_module_instance {
   enum minmea_sentence_id parse_sentences[MINMEA_SENTENCE_MAX];
   uint16_t parse_sentences_len;
 
-  gnss_module_event_handler event_handler;
+  gnss_receiver_event_handler event_handler;
 
   uart_config_t uart_cfg;
   uart_port_t uart_port;
@@ -23,28 +23,26 @@ struct gnss_module_instance {
   gpio_num_t tx_pin;
 };
 
-static int module_idx = 0;
-
-static struct gnss_module_instance gnss_module_global;
+static struct gnss_receiver_instance gnss_receiver_global;
 
 static void
 nmea_read_uart(uart_port_t uart_port, char *buf, uint16_t buf_size, uint32_t timeout_ms, enum minmea_sentence_id *parse_sentences,
-               uint8_t parse_sentences_len, gnss_module_event_handler event_handler);
+               uint8_t parse_sentences_len, gnss_receiver_event_handler event_handler);
 
 static void
 handle_nmea_sentence(const char *sentence, uint16_t len, enum minmea_sentence_id *parse_sentences, uint8_t parse_sentences_len,
-                     gnss_module_event_handler event_handler);
+                     gnss_receiver_event_handler event_handler);
 
 static void
 nmea_uart_task(void *arg);
 
 esp_err_t
-gnss_module_init(const uart_config_t *uart_cfg, uart_port_t uart_port, gpio_num_t rx_pin, gpio_num_t tx_pin,
-                 gnss_module_handle *out_module) {
+gnss_receiver_init(const uart_config_t *uart_cfg, uart_port_t uart_port, gpio_num_t rx_pin, gpio_num_t tx_pin,
+                 gnss_receiver_handle *out_receiver) {
   esp_err_t ret = ESP_OK;
 
-  struct gnss_module_instance *module = &gnss_module_global;
-  ESP_GOTO_ON_FALSE(out_module && uart_cfg && uart_port < UART_NUM_MAX && rx_pin < GPIO_NUM_MAX && tx_pin < GPIO_NUM_MAX,
+  struct gnss_receiver_instance *receiver = &gnss_receiver_global;
+  ESP_GOTO_ON_FALSE(out_receiver && uart_cfg && uart_port < UART_NUM_MAX && rx_pin < GPIO_NUM_MAX && tx_pin < GPIO_NUM_MAX,
                     ESP_ERR_INVALID_ARG, err, TAG, "invalid argument");
 
   ESP_GOTO_ON_ERROR(uart_param_config(uart_port, uart_cfg), err, TAG, "failed to configure UART");
@@ -52,92 +50,76 @@ gnss_module_init(const uart_config_t *uart_cfg, uart_port_t uart_port, gpio_num_
                     "failed to set UART pin");
   ESP_GOTO_ON_ERROR(uart_driver_install(uart_port, UART_RX_BUF_SIZE, 0, 0, NULL, 0), err, TAG, "failed to install UART driver");
 
-  ESP_GOTO_ON_FALSE(xTaskCreatePinnedToCore(nmea_uart_task, "nmea uart tsk", GNSS_MODULE_NMEA_TASK_STACK_SIZE, module,
-                                            GNSS_MODULE_NMEA_TASK_PRIORITY, &module->nmea_uart_task,
-                                            GNSS_MODULE_NMEA_TASK_CORE) == pdPASS,
+  ESP_GOTO_ON_FALSE(xTaskCreatePinnedToCore(nmea_uart_task, "nmea uart tsk", GNSS_RECEIVER_NMEA_TASK_STACK_SIZE, receiver,
+                                            GNSS_RECEIVER_NMEA_TASK_PRIORITY, &receiver->nmea_uart_task,
+                                            GNSS_RECEIVER_NMEA_TASK_CORE) == pdPASS,
                     ESP_FAIL, err, TAG, "failed to create NMEA uart task");
 
-  gnss_module_global.rx_pin = rx_pin;
-  gnss_module_global.tx_pin = tx_pin;
-  gnss_module_global.uart_port = uart_port;
-  gnss_module_global.uart_cfg = *uart_cfg;
+  gnss_receiver_global.rx_pin = rx_pin;
+  gnss_receiver_global.tx_pin = tx_pin;
+  gnss_receiver_global.uart_port = uart_port;
+  gnss_receiver_global.uart_cfg = *uart_cfg;
 
-  *out_module = module;
+  *out_receiver = receiver;
   return ESP_OK;
 err:
-  if (module) {
-    memset(module->rx_buf, 0, sizeof(module->rx_buf));
-    vTaskDelete(module->nmea_uart_task);
-    module->rx_len = 0U;
+  if (receiver) {
+    memset(receiver->rx_buf, 0, sizeof(receiver->rx_buf));
+    vTaskDelete(receiver->nmea_uart_task);
+    receiver->rx_len = 0U;
   }
   return ret;
 }
 esp_err_t
-gnss_module_del(gnss_module_handle module) {
-
+gnss_receiver_del(gnss_receiver_handle receiver) {
   return ESP_ERR_NOT_SUPPORTED;
 }
 
 esp_err_t
-gnss_module_start(gnss_module_handle module) {
-  ESP_RETURN_ON_FALSE(module, ESP_ERR_INVALID_ARG, TAG, "invalid argument in gnss_module_start");
-  ESP_RETURN_ON_FALSE(module->nmea_uart_task, ESP_ERR_INVALID_STATE, TAG, "invalid state, invalid queue handle");
+gnss_receiver_start(gnss_receiver_handle receiver) {
+  ESP_RETURN_ON_FALSE(receiver, ESP_ERR_INVALID_ARG, TAG, "invalid argument in gnss_receiver_start");
+  ESP_RETURN_ON_FALSE(receiver->nmea_uart_task, ESP_ERR_INVALID_STATE, TAG, "invalid state, invalid queue handle");
 
-  vTaskResume(module->nmea_uart_task);
-
-  return ESP_OK;
-}
-esp_err_t
-gnss_module_stop(gnss_module_handle module) {
-  ESP_RETURN_ON_FALSE(module, ESP_ERR_INVALID_ARG, TAG, "invalid argument in gnss_module_start");
-  ESP_RETURN_ON_FALSE(module->nmea_uart_task, ESP_ERR_INVALID_STATE, TAG, "invalid state, invalid queue handle");
-
-  vTaskSuspend(module->nmea_uart_task);
-
-  return ESP_OK;
-}
-
-esp_err_t
-gnss_module_read_sentence(gnss_module_handle module, struct gnss_module_sentence *out_sentence, uint32_t timeout_ms) {
-  char *line;
-  size_t len = 0;
-
-  if (len == 0) {
-    return ESP_OK;
-  }
-
-  if (NULL == line) {
-    return ESP_OK;
-  }
+  vTaskResume(receiver->nmea_uart_task);
 
   return ESP_OK;
 }
 esp_err_t
-gnss_module_write_sentence(gnss_module_handle module, const struct gnss_module_sentence sentence) {
+gnss_receiver_stop(gnss_receiver_handle receiver) {
+  ESP_RETURN_ON_FALSE(receiver, ESP_ERR_INVALID_ARG, TAG, "invalid argument in gnss_receiver_start");
+  ESP_RETURN_ON_FALSE(receiver->nmea_uart_task, ESP_ERR_INVALID_STATE, TAG, "invalid state, invalid queue handle");
+
+  vTaskSuspend(receiver->nmea_uart_task);
+
+  return ESP_OK;
+}
+
+esp_err_t
+gnss_receiver_write_sentence(gnss_receiver_handle receiver, const struct gnss_receiver_sentence sentence) {
   return ESP_ERR_NOT_SUPPORTED;
 }
 
 esp_err_t
-gnss_module_register_event_handler(gnss_module_handle module, gnss_module_event_handler handler) {
-  ESP_RETURN_ON_FALSE(module && handler, ESP_ERR_INVALID_ARG, TAG, "invalid argument");
+gnss_receiver_register_event_handler(gnss_receiver_handle receiver, gnss_receiver_event_handler handler) {
+  ESP_RETURN_ON_FALSE(receiver && handler, ESP_ERR_INVALID_ARG, TAG, "invalid argument");
 
-  module->event_handler = handler;
+  receiver->event_handler = handler;
 
   return ESP_OK;
 }
 
 esp_err_t
-gnss_module_update_parse_sentences(gnss_module_handle module, enum minmea_sentence_id *parse_sentences,
+gnss_receiver_update_parse_sentences(gnss_receiver_handle receiver, enum minmea_sentence_id *parse_sentences,
                                    uint8_t parse_sentences_len) {
 
-  ESP_RETURN_ON_FALSE(module && parse_sentences && parse_sentences_len && parse_sentences_len < MINMEA_SENTENCE_MAX,
+  ESP_RETURN_ON_FALSE(receiver && parse_sentences && parse_sentences_len && parse_sentences_len < MINMEA_SENTENCE_MAX,
                       ESP_ERR_INVALID_ARG, TAG, "invalid argument");
 
-  module->parse_sentences_len = parse_sentences_len;
+  receiver->parse_sentences_len = parse_sentences_len;
   for (uint8_t i = 0; i < parse_sentences_len; ++i) {
     ESP_RETURN_ON_FALSE(parse_sentences[i] > 0, ESP_ERR_INVALID_ARG, TAG, "invalid NMEA sentence requested");
-    module->parse_sentences[i] = parse_sentences[i];
-    ESP_LOGD(TAG, "Added %d sentence to parsed sentences", module->parse_sentences[i]);
+    receiver->parse_sentences[i] = parse_sentences[i];
+    ESP_LOGD(TAG, "Added %d sentence to parsed sentences", receiver->parse_sentences[i]);
   }
 
   return ESP_OK;
@@ -145,7 +127,7 @@ gnss_module_update_parse_sentences(gnss_module_handle module, enum minmea_senten
 
 static void
 nmea_read_uart(uart_port_t uart_port, char *buf, uint16_t buf_size, uint32_t timeout_ms, enum minmea_sentence_id *parse_sentences,
-               uint8_t parse_sentences_len, gnss_module_event_handler event_handler) {
+               uint8_t parse_sentences_len, gnss_receiver_event_handler event_handler) {
   int read_bytes = uart_read_bytes(uart_port, (uint8_t *)buf, buf_size - 1, pdMS_TO_TICKS(timeout_ms));
 
   if (read_bytes <= 0) {
@@ -185,7 +167,7 @@ nmea_read_uart(uart_port_t uart_port, char *buf, uint16_t buf_size, uint32_t tim
 
 static void
 handle_nmea_sentence(const char *sentence, uint16_t len, enum minmea_sentence_id *parse_sentences, uint8_t parse_sentences_len,
-                     gnss_module_event_handler event_handler) {
+                     gnss_receiver_event_handler event_handler) {
   ESP_RETURN_VOID_ON_FALSE(sentence && len, TAG, "invalid sentence in handle_nmea_sentence");
   ESP_RETURN_VOID_ON_FALSE(parse_sentences && parse_sentences_len, TAG, "invalid parse_sentences in handle_nmea_sentence");
   ESP_RETURN_VOID_ON_FALSE(event_handler, TAG, "invalid event_handler in handle_nmea_sentence");
@@ -196,7 +178,7 @@ handle_nmea_sentence(const char *sentence, uint16_t len, enum minmea_sentence_id
     return;
   }
 
-  struct gnss_module_sentence sentence_event = {
+  struct gnss_receiver_sentence sentence_event = {
       .sentence_id = sentence_id,
   };
 
@@ -332,12 +314,12 @@ nmea_uart_task(void *arg) {
 
   ESP_RETURN_VOID_ON_FALSE(arg, TAG, "invalid argument in nmea uart task");
 
-  struct gnss_module_instance *module = (struct gnss_module_instance *)arg;
-  ESP_RETURN_VOID_ON_FALSE(module, TAG, "invald gnss module instance");
+  struct gnss_receiver_instance *receiver = (struct gnss_receiver_instance *)arg;
+  ESP_RETURN_VOID_ON_FALSE(receiver, TAG, "invald gnss receiver instance");
 
   for (;;) {
-    nmea_read_uart(module->uart_port, module->rx_buf, UART_RX_BUF_SIZE, 60U, module->parse_sentences, module->parse_sentences_len,
-                   module->event_handler);
-    vTaskDelay(pdMS_TO_TICKS(GNSS_MODULE_NMEA_TASK_PERIOD_MS));
+    nmea_read_uart(receiver->uart_port, receiver->rx_buf, UART_RX_BUF_SIZE, 60U, receiver->parse_sentences, receiver->parse_sentences_len,
+                   receiver->event_handler);
+    vTaskDelay(pdMS_TO_TICKS(GNSS_RECEIVER_NMEA_TASK_PERIOD_MS));
   }
 }

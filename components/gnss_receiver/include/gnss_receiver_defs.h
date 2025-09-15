@@ -1,6 +1,6 @@
 #pragma once
-#ifndef GNSS_MODULE_DEFS_H
-#define GNSS_MODULE_DEFS_H
+#ifndef GNSS_RECEIVER_DEFS_H
+#define GNSS_RECEIVER_DEFS_H
 
 #include "minmea/minmea.h"
 
@@ -8,9 +8,9 @@
 extern "C" {
 #endif
 
-typedef struct gnss_module_instance *gnss_module_handle;
+typedef struct gnss_receiver_instance *gnss_receiver_handle;
 
-struct gnss_module_sentence {
+struct gnss_receiver_sentence {
   enum minmea_sentence_id sentence_id;
   union {
     struct minmea_sentence_gbs gbs;
@@ -25,7 +25,7 @@ struct gnss_module_sentence {
   } sentence;
 };
 
-typedef void (*gnss_module_event_handler)(struct gnss_module_sentence);
+typedef void (*gnss_receiver_event_handler)(struct gnss_receiver_sentence);
 
 #ifdef __cplusplus
 }
