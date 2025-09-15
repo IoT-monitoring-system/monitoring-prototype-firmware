@@ -1,4 +1,4 @@
-file(GLOB_RECURSE SNTP_MODULE_SRC
+file(GLOB_RECURSE LOGGER_SRC
   "src/*.*"
 )
 
@@ -8,8 +8,8 @@ list(APPEND INCLUDE_DIRS
 
 if(ESP_PLATFORM)
   idf_component_register(
-    SRCS ${SNTP_MODULE_SRC}
+    SRCS ${LOGGER_SRC}
     INCLUDE_DIRS ${INCLUDE_DIRS}
-    PRIV_REQUIRES lwip esp_netif
+    PRIV_REQUIRES esp_netif
   )
 endif()
