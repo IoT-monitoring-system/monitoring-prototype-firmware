@@ -1,4 +1,0 @@
-dependencies:
-  idf: '>=5.0'
-description: ADC Module
-version: 0.0.1
