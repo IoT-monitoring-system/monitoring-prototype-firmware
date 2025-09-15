@@ -114,7 +114,14 @@
     "freertos.h": "c",
     "semphr.h": "c",
     "alert_module_defs.h": "c",
-    "stdbool.h": "c"
+    "stdbool.h": "c",
+    "mqtt_transmission_module.h": "c",
+    "config.h": "c",
+    "mqtt_transmission_module_config.h": "c",
+    "bme69xlibrary.h": "c",
+    "stddef.h": "c",
+    "esp_check.h": "c",
+    "logger.h": "c"
   },
   "idf.flashType": "UART",
   "idf.port": "/dev/ttyACM0"
