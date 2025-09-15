@@ -1,4 +1,4 @@
 dependencies:
   idf: '>=5.0'
-description: MQTT module
+description: A simple MQTT client library
 version: 0.0.1
