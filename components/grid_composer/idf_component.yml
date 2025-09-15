@@ -1,4 +1,0 @@
-dependencies:
-  idf: '>=5.0'
-description: Grid composer
-version: 0.0.1
