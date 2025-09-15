@@ -2,51 +2,11 @@
 	path = components/BME69xLibrary
 	url = git@github.com:xl9p/BME69xLibrary.git
 	branch = main
-[submodule "components/Adafruit_SH110x"]
-	path = components/Adafruit_SH110x
-	url = git@github.com:xl9p/Adafruit_SH110x.git
-	branch = modified
-[submodule "components/Adafruit-GFX-Library"]
-	path = components/Adafruit-GFX-Library
-	url = git@github.com:xl9p/Adafruit-GFX-Library.git
-	branch = modified
-[submodule "components/Adafruit_Sensor"]
-	path = components/Adafruit_Sensor
-	url = git@github.com:xl9p/Adafruit_Sensor.git
-	branch = modified
-[submodule "components/U8g2_for_Adafruit_GFX"]
-	path = components/U8g2_for_Adafruit_GFX
-	url = git@github.com:xl9p/U8g2_for_Adafruit_GFX.git
-	branch = modified
-[submodule "components/BME68xLibrary"]
-	path = components/BME68xLibrary
-	url = git@github.com:xl9p/BME68xLibrary.git
-	branch = modified
-[submodule "components/Adafruit_BusIO"]
-	path = components/Adafruit_BusIO
-	url = git@github.com:xl9p/Adafruit_BusIO.git
-	branch = modified
 [submodule "components/SparkFun_ADXL345"]
 	path = components/SparkFun_ADXL345
 	url = git@github.com:xl9p/SparkFun_ADXL345_Arduino_Library.git
 	branch = i2c_custom_mod
-[submodule "components/Adafruit_INA260"]
-	path = components/Adafruit_INA260
-	url = git@github.com:xl9p/Adafruit_INA260.git
-	branch = master
-[submodule "components/CSE_GNSS"]
-	path = components/CSE_GNSS
-	url = git@github.com:xl9p/CSE_GNSS.git
-	branch = modified
 [submodule "components/Adafruit_NeoPixel"]
 	path = components/Adafruit_NeoPixel
 	url = git@github.com:xl9p/Adafruit_NeoPixel.git
 	branch = v1.12.3_with_build_files
-[submodule "components/RTClib"]
-	path = components/RTClib
-	url = git@github.com:xl9p/RTClib.git
-	branch = modified_build_files
-[submodule "components/ADS1X15"]
-	path = components/ADS1X15
-	url = git@github.com:xl9p/ADS1X15.git
-	branch = modified
