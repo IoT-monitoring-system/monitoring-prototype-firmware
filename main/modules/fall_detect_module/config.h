@@ -1,0 +1,20 @@
+#pragma once
+#ifndef FALL_DETECT_MODULE_CONFIG_H
+#define FALL_DETECT_MODULE_CONFIG_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define TASK_QUEUE_SEND_TIMEOUT_MS 60000U
+
+#define TASK_ADXL345_SAMPLING_PERIOD_MS 40U
+
+#define TASK_FALL_DETECTION_CALC_PERIOD_MS   1000U
+#define TASK_FALL_DETECTION_REPORT_PERIOD_MS   60000U
+#define TASK_FALL_DETECTION_DATA_WINDOW_SIZE 25U
+
+#ifdef __cplusplus
+}
+#endif
+#endif
