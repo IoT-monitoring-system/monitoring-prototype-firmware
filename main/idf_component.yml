@@ -2,18 +2,10 @@ dependencies:
   idf: '>=5.3,<5.5'
   espressif/arduino-esp32: ^3.2.1
   bblanchon/arduinojson: ^7.4.2
-  BME69xLibrary: ^0.0.1
-  BME68xLibrary: ^0.0.1
-  ADS1X15: ^0.0.1
-  Adafruit_BusIO: ^0.0.1
-  Adafruit_Sensor: ^0.0.1
-  Adafruit_SH110x: ^0.0.1
-  Adafruit-GFX-Library: ^0.0.1
-  U8g2_for_Adafruit_GFX: ^0.0.1
-  grid_composer: ^0.0.1
   cbor_sensor_encoder: ^0.0.1
+  BME69xLibrary: ^0.0.1
   alert_module: ^0.0.1
-  mqtt_module: ^0.0.1
-  adc_module: ^0.0.1
-  sntp_module: ^0.0.1
-  gnss_module: ^0.0.1
+  mqtt_client_simple: ^0.0.1
+  sntp_client: ^0.0.1
+  gnss_receiver: ^0.0.1
+  logger: ^0.0.1
