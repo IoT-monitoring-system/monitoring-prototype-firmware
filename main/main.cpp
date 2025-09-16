@@ -73,7 +73,6 @@ app_main() {
 
   init_i2c();
   init_file_system();
-
   init_wifi();
   init_sntp();
 
@@ -109,8 +108,6 @@ app_main() {
   gnss_position_module_start();
   fall_detect_module_start();
   mqtt_transmission_module_start();
-
-  vTaskDelay(pdMS_TO_TICKS(5000U));
 }
 
 esp_err_t
