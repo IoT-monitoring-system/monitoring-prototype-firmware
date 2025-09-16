@@ -37,10 +37,10 @@ enum class BMESensorState {
  */
 struct BMEHeaterProfile {
   std::string id;
-  int16_t timeBase = 140;
+  uint32_t timeBaseUs = 140000U;
   uint16_t temperature[10];
   uint16_t duration[10];
-  uint64_t heatCycleDuration;
+  uint64_t heatCycleDurationUs;
   uint8_t length;
 };
 
@@ -48,7 +48,7 @@ struct BMEDutyCycleProfile {
   std::string id;
   uint8_t numScans;
   uint8_t numSleeps;
-  uint64_t sleepDuration;
+  uint64_t sleepDurationUs;
 };
 
 struct BMESensorConfig {
@@ -59,7 +59,7 @@ struct BMESensorConfig {
 };
 
 struct BMESensorScheduleInfo {
-  uint64_t wakeUpTime;
+  uint64_t wakeUpTimeUs;
   uint8_t dutyCycleIndex;
   uint8_t heaterIndex;
 };
@@ -78,6 +78,8 @@ struct BMEMngrSensor {
   BMESensorConfig config;
   BMESensorStateInfo stateInfo;
   BMESensorScheduleInfo scheduleInfo;
+
+  uint64_t last_meas_timestamp_us;
 };
 
 struct BMESensorData {

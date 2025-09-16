@@ -37,8 +37,8 @@ BME6xxCfgSerializer::deserializeConfig(FSFile &cfg, std::vector<BMESensorConfig>
     heaterProfiles[i].id = heaterProfilesJson[i]["id"].as<std::string>();
 
     heaterProfiles[i].length = heaterProfilesJson[i]["temperatureTimeVectors"].size();
-    heaterProfiles[i].timeBase = heaterProfilesJson[i]["timeBase"];
-    heaterProfiles[i].heatCycleDuration = 0;
+    heaterProfiles[i].timeBaseUs = heaterProfilesJson[i]["timeBase"].as<uint32_t>() * 1000U;
+    heaterProfiles[i].heatCycleDurationUs = 0;
 
     for (uint8_t j = 0; j < heaterProfiles[i].length; j++) {
       temp = heaterProfilesJson[i]["temperatureTimeVectors"][j][0].as<uint16_t>();
@@ -47,7 +47,7 @@ BME6xxCfgSerializer::deserializeConfig(FSFile &cfg, std::vector<BMESensorConfig>
       heaterProfiles[i].temperature[j] = temp;
       heaterProfiles[i].duration[j] = dur;
 
-      heaterProfiles[i].heatCycleDuration += (dur * heaterProfiles[i].timeBase);
+      heaterProfiles[i].heatCycleDurationUs += (dur * heaterProfiles[i].timeBaseUs);
     }
   }
 
@@ -79,8 +79,8 @@ BME6xxCfgSerializer::deserializeConfig(FSFile &cfg, std::vector<BMESensorConfig>
       }
     }
 
-    configurations[i].dutyCycleProfile.sleepDuration =
-        configurations[i].dutyCycleProfile.numSleeps * configurations[i].heaterProfile.heatCycleDuration;
+    configurations[i].dutyCycleProfile.sleepDurationUs =
+        configurations[i].dutyCycleProfile.numSleeps * configurations[i].heaterProfile.heatCycleDurationUs;
   }
 
   return ESP_OK;

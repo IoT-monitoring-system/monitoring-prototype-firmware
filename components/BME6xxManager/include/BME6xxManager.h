@@ -55,7 +55,7 @@ public:
   esp_err_t
   resetSensor(BMEMngrSensor &sensor);
 
-  bool
+  uint64_t
   scheduleSensor();
 
   std::vector<BME6xxSensor *>

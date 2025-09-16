@@ -7,7 +7,11 @@
 // #define BME6XX_DONT_USE_FPU
 #define BME6XX_USE_FPU
 
-enum BME6xxMask { HEAT_STAB_MSK = 0x10, GASM_VALID_MSK = 0x20, NEW_DATA_MSK = 0x80 };
+enum BME6xxMask {
+  HEAT_STAB_MSK = 0x10,
+  GASM_VALID_MSK = 0x20,
+  NEW_DATA_MSK = 0x80,
+};
 
 enum class BME6xxStatus : int8_t {
   ERROR_SELF_TEST = -5,

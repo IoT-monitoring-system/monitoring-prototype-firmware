@@ -4,6 +4,7 @@
 
 #include "esp_check.h"
 #include "esp_log.h"
+#include "esp_pm.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
@@ -144,33 +145,37 @@ task_bme6xx_sampling(void *arg) {
   payload.field_count = 3U;
 
   for (;;) {
+    esp_err_t ret = ESP_OK;
     if (ulTaskNotifyTake(pdTRUE, 0)) {
       vTaskSuspend(NULL);
     }
 
-    while (bme6xx_manager.scheduleSensor()) {
-      BMESensorData sensor_data;
-      esp_err_t ret = bme6xx_manager.collectData(sensor_data);
-      if (ret != ESP_OK) {
-        break;
-      }
+    BMESensorData sensor_data;
+    do {
+      vTaskDelay(pdMS_TO_TICKS(10));
+      ret = bme6xx_manager.collectData(sensor_data);
+    } while (ret == ESP_ERR_SENSOR_NO_NEW_DATA);
 
-      strncpy(payload.sensor, sensor_data.type, SENSOR_NAME_MAX_LEN - 1); // Dynamic
-      payload.sensor[SENSOR_NAME_MAX_LEN - 1] = '\0';
+    strncpy(payload.sensor, sensor_data.type, SENSOR_NAME_MAX_LEN - 1); // Dynamic
+    payload.sensor[SENSOR_NAME_MAX_LEN - 1] = '\0';
 
-      for (uint8_t i = 0; i < sensor_data.dataLen; ++i) {
-        payload.timestamp = (uint64_t)(sensor_data.data[i].meas_timestamp + sntp_client_get_boot_posix_time_us(sntp_client));
+    for (uint8_t i = 0; i < sensor_data.dataLen; ++i) {
+      payload.timestamp = (uint64_t)(sensor_data.data[i].meas_timestamp + sntp_client_get_boot_posix_time_us(sntp_client));
 
-        payload.fields[0].value.u = sensor_data.sensorId;               /* sens_id */
-        payload.fields[1].value.u = sensor_data.data[i].gas_index;      /* gas index */
-        payload.fields[2].value.f = sensor_data.data[i].gas_resistance; /* gas res */
+      payload.fields[0].value.u = sensor_data.sensorId;               /* sens_id */
+      payload.fields[1].value.u = sensor_data.data[i].gas_index;      /* gas index */
+      payload.fields[2].value.f = sensor_data.data[i].gas_resistance; /* gas res */
 
-        if (xQueueSend(out_queue, &payload, pdMS_TO_TICKS(TASK_QUEUE_SEND_TIMEOUT_MS)) != pdTRUE) {
-          ESP_LOGE(TAG, "Failed sending from BME sampling task");
-        }
+      if (xQueueSend(out_queue, &payload, pdMS_TO_TICKS(TASK_QUEUE_SEND_TIMEOUT_MS)) != pdTRUE) {
+        ESP_LOGE(TAG, "Failed sending from BME sampling task");
       }
     }
-    vTaskDelay(pdMS_TO_TICKS(65));
+
+    // Last call to collectDataTest would've updated time sleep, so this will work with updated values
+    uint64_t sleep_time_ms = (uint64_t)((bme6xx_manager.scheduleSensor() - esp_timer_get_time()) / 1000U);
+    ESP_LOGD(TAG, "Sleep time: %llu ms", sleep_time_ms);
+
+    vTaskDelay(pdMS_TO_TICKS(sleep_time_ms));
   }
 }
 
