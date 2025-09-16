@@ -196,8 +196,8 @@
     "dutyCycleProfiles": [
       {
         "id": "duty_1_0",
-        "numberScanningCycles": 1,
-        "numberSleepingCycles": 0
+        "numberScanningCycles": 60,
+        "numberSleepingCycles": 6
       }
     ],
     "sensorConfigurations": [
