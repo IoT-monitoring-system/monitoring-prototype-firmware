@@ -6,6 +6,8 @@
 
 #include "esp_check.h"
 #include "esp_log.h"
+#include "esp_pm.h"
+#include "esp_sleep.h"
 #include "nvs_flash.h"
 
 #include "Arduino.h"
@@ -35,10 +37,7 @@
 static const char *TAG = "monitoring_node";
 
 FSManager fs_manager;
-
 sntp_client_handle sntp_client;
-
-QueueHandle_t data_aggregation_queue_handle;
 
 esp_err_t
 init_i2c();
@@ -51,6 +50,13 @@ init_sntp();
 
 extern "C" void
 app_main() {
+  esp_pm_config_t pm_conf = {
+      .max_freq_mhz = 80,
+      .min_freq_mhz = 80,
+      .light_sleep_enable = false, // true - Doesn't quite work as expected
+  };
+  ESP_ERROR_CHECK_WITHOUT_ABORT(esp_pm_configure(&pm_conf));
+
   initArduino();
   vTaskDelay(pdMS_TO_TICKS(1000));
 
@@ -71,6 +77,9 @@ app_main() {
   init_wifi();
   init_sntp();
 
+  vTaskDelay(pdMS_TO_TICKS(1000));
+
+  QueueHandle_t data_aggregation_queue_handle;
   mqtt_transmission_module_init(&data_aggregation_queue_handle);
 
   bme_sample_module_config bme_cfg = {
@@ -96,10 +105,12 @@ app_main() {
 
   vTaskDelay(pdMS_TO_TICKS(1000U));
 
-  mqtt_transmission_module_start();
   bme_sample_module_start();
   gnss_position_module_start();
   fall_detect_module_start();
+  mqtt_transmission_module_start();
+
+  vTaskDelay(pdMS_TO_TICKS(5000U));
 }
 
 esp_err_t
